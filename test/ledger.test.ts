@@ -60,6 +60,14 @@ describe('postVoucher', () => {
     expect(ledger.postVoucher(pay('p3', 100, 0, '2027-01-05')).number).toBe(1);
     expect(ledger.verifyIntegrity().ok).toBe(true);
   });
+  it('har egen hash-kedja per räkenskapsår', () => {
+    const { ledger, db } = setup();
+    openFiscalYear(db, 2027);
+    ledger.postVoucher(pay('p1'));
+    ledger.postVoucher(pay('p2', 100, 0, '2027-01-05'));
+    expect(db.prepare('SELECT prev_hash p FROM voucher WHERE fiscal_year_id=2').get()).toEqual({ p: '0' });
+    expect(ledger.verifyIntegrity().ok).toBe(true);
+  });
   it('sparar underlag med sha256', () => {
     const { ledger, db } = setup();
     const sha = 'a'.repeat(64);
