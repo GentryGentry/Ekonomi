@@ -15,6 +15,8 @@
 | D-011 | Rättelse (K) är en enda verifikation med vändrader plus ev. ersättningsrader. Datum: ersättningens datum, annars originalets om året är öppet, annars dagens. Ett original rättas högst en gång, en rättelse rättas inte (bokför ny A-verifikation). | Enkel att granska, originalet orört. | Två verifikationer (vändning + ny): fler nummer, svårare att läsa ihop. ⚖️ konsult bekräftar datumregel. |
 | D-012 | postVoucher är idempotent per (source_type, source_id): samma innehåll ger samma verifikation, annat innehåll ger IDEMPOTENCY_CONFLICT. | Dubbelbokning av en betalning ska vara omöjlig, men ett omförsök ska vara ofarligt. | Alltid fel vid dubblett: sämre för omförsök. |
 | D-013 | Hash-kedjan är global (över alla serier och år, i id-ordning) och täcker rader, datum, text, källa och rättelsepekare. | Enklast att verifiera, ordningen blir bevisbar. | Kedja per serie. |
+| D-011 | PDF med pdf-lib (standardfont Helvetica, fasta metadata, inga tidsstämplar från klockan). | Deterministisk utdata (samma faktura ger samma sha256), inga native beroenden, WinAnsi täcker å ä ö. | pdfkit: tidsstämplar och ID i filen, kräver mer arbete för determinism. Headless Chrome: tungt och icke-deterministiskt. |
+| D-012 | Fakturering tillåter bara 25 % moms och ett intäktskonto per faktura tills kärnan bokar fler. Kontantmetodens fakturatext är data hos utfärdaren och utfärdande vägras utan den. | `paymentVoucher()` bokar bara 25 % mot ett konto. Texten är en öppen juridisk punkt, inget ska gissas. | Standardtext i kod: kan bli fel på en lagstadgad uppgift. |
 
 ## Öppna juridiska punkter (verifieras, inte antas)
 - Exakt fakturatext vid kontantmetoden mot Skatteverket (finns redan som "att verifiera" i Grund).
