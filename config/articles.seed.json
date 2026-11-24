@@ -1,0 +1,9 @@
+{
+  "source": "Notion: D&G – Grund, avsnitt Paket och avtal. Hämtat 2026-11-24. Priser exkl. moms. Ändra priser i Notion först, sedan här.",
+  "note": "revenueAccount är ett platshållarvärde tills redovisningskonsult bekräftat kontoplanen (D-009).",
+  "articles": [
+    { "code": "STANDARD", "description": "Standardavtal: hemsida med medlemsdel, månadsavgift", "unit": "mån", "unitPriceOre": 69900, "vatRate": 25, "revenueAccount": 3010 },
+    { "code": "PLUS", "description": "Plusavtal: hemsida med medlemsdel, månadsavgift", "unit": "mån", "unitPriceOre": 99900, "vatRate": 25, "revenueAccount": 3010 },
+    { "code": "STARTAVGIFT", "description": "Startavgift", "unit": "st", "unitPriceOre": 290000, "vatRate": 25, "revenueAccount": 3010 }
+  ]
+}
