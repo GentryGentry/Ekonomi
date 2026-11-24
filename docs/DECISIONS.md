@@ -14,7 +14,7 @@
 | D-010 | PDF-bibliotek väljs av fakturatråden. Krav: deterministisk utdata, svenska tecken, lagras med sha256 som underlag. | PDF är fakturans domän. | n/a |
 | D-011 | Rättelse (K) är en enda verifikation med vändrader plus ev. ersättningsrader. Datum: ersättningens datum, annars originalets om året är öppet, annars dagens. Ett original rättas högst en gång, en rättelse rättas inte (bokför ny A-verifikation). | Enkel att granska, originalet orört. | Två verifikationer (vändning + ny): fler nummer, svårare att läsa ihop. ⚖️ konsult bekräftar datumregel. |
 | D-012 | postVoucher är idempotent per (source_type, source_id): samma innehåll ger samma verifikation, annat innehåll ger IDEMPOTENCY_CONFLICT. | Dubbelbokning av en betalning ska vara omöjlig, men ett omförsök ska vara ofarligt. | Alltid fel vid dubblett: sämre för omförsök. |
-| D-013 | Hash-kedjan är global (över alla serier och år, i id-ordning) och täcker rader, datum, text, källa och rättelsepekare. | Enklast att verifiera, ordningen blir bevisbar. | Kedja per serie. |
+| D-013 | Hash-kedjan är per räkenskapsår (över alla serier, i id-ordning), genesis '0' varje år och täcker rader, datum, text, källa och rättelsepekare. | Ett år ska kunna arkiveras och raderas som enhet efter 7 år (GDPR art 5(1)(e), lagkravslistan G-03). Rättelsepekare över årsgräns kan finnas kvar och måste hanteras vid radering. | Global kedja: hindrar radering per år. |
 
 ## Öppna juridiska punkter (verifieras, inte antas)
 - Exakt fakturatext vid kontantmetoden mot Skatteverket (finns redan som "att verifiera" i Grund).

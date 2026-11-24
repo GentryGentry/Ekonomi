@@ -68,7 +68,7 @@ export function createLedger(db: Database.Database, opts: LedgerOptions = {}): L
   const insertAttachment = db.prepare(`INSERT INTO attachment (voucher_id, sha256, filename, stored_at) VALUES (?, ?, ?, ?)`);
   const yearFor = db.prepare(`SELECT id, closed_at FROM fiscal_year WHERE start_date <= ? AND end_date >= ?`);
   const accountOk = db.prepare(`SELECT active FROM account WHERE number = ?`);
-  const lastHash = db.prepare(`SELECT hash FROM voucher ORDER BY id DESC LIMIT 1`);
+  const lastHash = db.prepare(`SELECT hash FROM voucher WHERE fiscal_year_id = ? ORDER BY id DESC LIMIT 1`);
   const nextNumber = db.prepare(`SELECT COALESCE(MAX(number), 0) + 1 AS n FROM voucher WHERE fiscal_year_id = ? AND series = ?`);
   const bySource = db.prepare(`SELECT * FROM voucher WHERE source_type = ? AND source_id = ?`);
   const voucherById = db.prepare(`SELECT * FROM voucher WHERE id = ?`);
@@ -103,7 +103,7 @@ export function createLedger(db: Database.Database, opts: LedgerOptions = {}): L
     }
     const fy = openYearFor(args.entryDate);
     const number = (nextNumber.get(fy, args.series) as { n: number }).n;
-    const prev = (lastHash.get() as { hash: string } | undefined)?.hash ?? GENESIS;
+    const prev = (lastHash.get(fy) as { hash: string } | undefined)?.hash ?? GENESIS;
     const registeredAt = now().toISOString();
     const meta = {
       fiscalYearId: fy, series: args.series, number, entryDate: args.entryDate, registeredAt,
@@ -173,11 +173,13 @@ export function createLedger(db: Database.Database, opts: LedgerOptions = {}): L
 
   function verify(): { ok: boolean; problems: string[] } {
     const problems: string[] = [];
-    let prev = GENESIS;
+    // Kedjan är per räkenskapsår (GDPR: ett år ska kunna raderas som enhet efter 7 år).
+    const prevByYear = new Map<number, string>();
     const seen = new Map<string, number>();
     for (const v of allVouchers.all() as VoucherRow[]) {
       const tag = `${v.series}${v.number} (id ${v.id})`;
       const rows = linesOf.all(v.id) as LineRow[];
+      const prev = prevByYear.get(v.fiscal_year_id) ?? GENESIS;
       if (v.prev_hash !== prev) problems.push(`${tag}: prev_hash bryter kedjan`);
       const calc = computeHash(v.prev_hash, {
         fiscalYearId: v.fiscal_year_id, series: v.series, number: v.number, entryDate: v.entry_date,
@@ -192,7 +194,7 @@ export function createLedger(db: Database.Database, opts: LedgerOptions = {}): L
       const expected = (seen.get(key) ?? 0) + 1;
       if (v.number !== expected) problems.push(`${tag}: nummerföljd bruten, väntade ${expected}`);
       seen.set(key, v.number);
-      prev = v.hash;
+      prevByYear.set(v.fiscal_year_id, v.hash);
     }
     return { ok: problems.length === 0, problems };
   }
